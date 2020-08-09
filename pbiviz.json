@@ -1,13 +1,13 @@
 {
     "visual": {
-        "name": "powerBIModelViwer",
-        "displayName": "PowerBIModelViwer",
-        "guid": "powerBIModelViwerF6939839B0BB4DCBAEE1B42CFB258A97",
+        "name": "powerBIModelViewer",
+        "displayName": "PowerBIModelViewer",
+        "guid": "powerBIModelViewerF6939839B0BB4DCBAEE1B42CFB258A97",
         "visualClassName": "Visual",
-        "version": "1.0.0",
+        "version": "0.0.1",
         "description": "glTF Viewer",
-        "supportUrl": "www.test.com",
-        "gitHubUrl": ""
+        "supportUrl": "https://github.com/kelleyma49/powerBIModelViewer/issues",
+        "gitHubUrl": "https://github.com/kelleyma49/powerBIModelViewer"
     },
     "apiVersion": "2.6.0",
     "author": {
