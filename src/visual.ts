@@ -40,51 +40,30 @@ import DataView = powerbi.DataView;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 
 import {ModelViewerElement} from '@google/model-viewer/dist/model-viewer';
-//import ModelViewerElement from '@google/model-viewer';
 
 import { VisualSettings } from "./settings";
+
 export class Visual implements IVisual {
     private target: HTMLElement;
-    private div: HTMLDivElement;
     private modelViewer: ModelViewerElement;
     private settings: VisualSettings;
 
-    private updateCount: number;
     /*private settings: VisualSettings;*/
-    private textNode: Text;
 
     constructor(options: VisualConstructorOptions) {
-        this.updateCount = 0;
-        console.log('Visual constructor', options);
         this.target = options.element;
-        //if (document) {
-           
-
-            /*const new_p: HTMLElement = document.createElement("p");
-            new_p.appendChild(document.createTextNode("Update count:"));
-            const new_em: HTMLElement = document.createElement("em");
-            this.textNode = document.createTextNode(this.updateCount.toString());
-            new_em.appendChild(this.textNode);
-            new_p.appendChild(new_em);
-            this.target.appendChild(new_p);*/
-        //}
     }
 
     @logExceptions()
     public update(options: VisualUpdateOptions) {
-        console.log("in update model viewer");
-        if (this.modelViewer) {
-            return
+        //console.log("in update model viewer");
+        if (!this.modelViewer) {
+            this.modelViewer = new ModelViewerElement();
+            this.modelViewer.src = "https://cdn.glitch.com/36cb8393-65c6-408d-a538-055ada20431b/Astronaut.glb?1542147958948";
+            this.target.appendChild(this.modelViewer);
+            this.modelViewer.cameraControls = true;
         }
-
-        this.modelViewer = new ModelViewerElement();
-        //this.modelViewer.style.backgroundColor = "red";
-        this.modelViewer.src = "https://cdn.glitch.com/36cb8393-65c6-408d-a538-055ada20431b/Astronaut.glb?1542147958948";
-        //this.modelViewer.src = "shared-assets/models/Astronaut.glb";
-        this.modelViewer.cameraControls = true;
-        this.target.appendChild(this.modelViewer);
-
-        console.log("after model viewer");
+        //console.log("after model viewer");
     }
 
     private static parseSettings(dataView: DataView): VisualSettings {
