@@ -1,0 +1,17 @@
+{
+    "version": "1.0.0",
+    "author": {"name":"Michael Kelley","email":"michael.a.kelley@gmail.com"},
+    "resources": [
+        {
+            "resourceId": "rId0",
+            "sourceType": 5,
+            "file": "resources/powerBIModelViwerF6939839B0BB4DCBAEE1B42CFB258A97.pbiviz.json"
+        }
+    ],
+    "visual": {"name":"powerBIModelViwer","displayName":"PowerBIModelViwer","guid":"powerBIModelViwerF6939839B0BB4DCBAEE1B42CFB258A97","visualClassName":"Visual","version":"1.0.0","description":"glTF Viewer","supportUrl":"www.test.com","gitHubUrl":""},
+    "metadata": {
+        "pbivizjson": {
+            "resourceId": "rId0"
+        }
+    }  
+}
