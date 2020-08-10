@@ -62,14 +62,20 @@ export class Visual implements IVisual {
             div.setAttribute("id","model-viewer-div");
       
             this.modelViewer = new ModelViewerElement();
-            this.modelViewer.src = "https://cdn.glitch.com/36cb8393-65c6-408d-a538-055ada20431b/Astronaut.glb?1542147958948";
             this.modelViewer.cameraControls = true;
             div.appendChild(this.modelViewer);
             this.target.appendChild(div);
         }
 
+        // apply settings:
         this.modelViewer.cameraControls = this.visualSettings.camera.controls;
         this.modelViewer.style.backgroundColor = this.visualSettings.camera.backgroundColor; 
+
+        // load model:
+        let dataView: DataView = options.dataViews[0];
+        this.modelViewer.src = <string>dataView.single.value;
+        
+        //this.modelViewer.src = "https://cdn.glitch.com/32f1ec0f-1e16-448a-b891-71f24804e417%2FDuck.glb?v=1561641862851";
         //console.log("after model viewer");
     }
 
