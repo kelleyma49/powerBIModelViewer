@@ -46,9 +46,7 @@ import { VisualSettings } from "./settings";
 export class Visual implements IVisual {
     private target: HTMLElement;
     private modelViewer: ModelViewerElement;
-    private settings: VisualSettings;
-
-    /*private settings: VisualSettings;*/
+    private visualSettings: VisualSettings;
 
     constructor(options: VisualConstructorOptions) {
         this.target = options.element;
@@ -56,13 +54,22 @@ export class Visual implements IVisual {
 
     @logExceptions()
     public update(options: VisualUpdateOptions) {
+        this.visualSettings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
+  
         //console.log("in update model viewer");
         if (!this.modelViewer) {
+            const div: HTMLElement = document.createElement("div");
+            div.setAttribute("id","model-viewer-div");
+      
             this.modelViewer = new ModelViewerElement();
             this.modelViewer.src = "https://cdn.glitch.com/36cb8393-65c6-408d-a538-055ada20431b/Astronaut.glb?1542147958948";
-            this.target.appendChild(this.modelViewer);
             this.modelViewer.cameraControls = true;
+            div.appendChild(this.modelViewer);
+            this.target.appendChild(div);
         }
+
+        this.modelViewer.cameraControls = this.visualSettings.camera.controls;
+        this.modelViewer.style.backgroundColor = this.visualSettings.camera.backgroundColor; 
         //console.log("after model viewer");
     }
 
@@ -76,7 +83,7 @@ export class Visual implements IVisual {
      *
      */
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
-        return VisualSettings.enumerateObjectInstances(this.settings || VisualSettings.getDefault(), options);
+        return VisualSettings.enumerateObjectInstances(this.visualSettings || VisualSettings.getDefault(), options);
     }
 }
 

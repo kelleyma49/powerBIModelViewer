@@ -7,11 +7,12 @@
         }
     ],
     "objects": {
-        "dataPoint": {
-            "displayName": "Data colors",
+        "camera": {
+            "displayName": "Camera",
             "properties": {
-                "defaultColor": {
-                    "displayName": "Default color",
+                "backgroundColor": {
+                    "displayName": "Background Color",
+                    "description": "The Background color.",
                     "type": {
                         "fill": {
                             "solid": {
@@ -20,34 +21,11 @@
                         }
                     }
                 },
-                "showAllDataPoints": {
-                    "displayName": "Show all",
+                "controls": {
+                    "displayName": "Controls",
+                    "description": "Enabling camera controls.",
                     "type": {
                         "bool": true
-                    }
-                },
-                "fill": {
-                    "displayName": "Fill",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "fillRule": {
-                    "displayName": "Color saturation",
-                    "type": {
-                        "fill": {}
-                    }
-                },
-                 "fontSize": {
-                    "displayName": "Text Size",
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
                     }
                 }
             }
