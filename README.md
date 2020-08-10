@@ -1,5 +1,5 @@
 # powerBIModelViewer
-Power BI Custom Visualization build on top of [Google's &lt;model-viewer&gt;](https://modelviewer.dev/).
+Power BI Custom Visualization built on top of [Google's &lt;model-viewer&gt;](https://modelviewer.dev/).
 
 ![](demo.gif)
 
