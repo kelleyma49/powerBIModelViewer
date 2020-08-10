@@ -27,6 +27,32 @@
                     "type": {
                         "bool": true
                     }
+                },
+                "autoRotate": {
+                    "displayName": "Auto Rotate",
+                    "description": "Auto-rotate the camera.",
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "modelShadow": {
+            "displayName": "Model Shadow",
+            "properties": {
+                "intensity": {
+                    "displayName": "Intensity",
+                    "description": "The intensity of the shadow. 0 turns off the shadow.",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "softness": {
+                    "displayName": "Softness",
+                    "description": "Controls the blurriness of the shadow. Set to 0 for hard shadows.",
+                    "type": {
+                        "numeric": true
+                    }
                 }
             }
         }

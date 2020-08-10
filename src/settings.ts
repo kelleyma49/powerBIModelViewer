@@ -31,12 +31,22 @@ import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 
 export class VisualSettings extends DataViewObjectsParser {
       public camera: cameraSettings = new cameraSettings();
+      public modelShadow: modelShadowSettings = new modelShadowSettings();
       }
 
     export class cameraSettings {
-     // Default color
+     // background color
       public backgroundColor: string = "";
-     // Show all
+     // allow camera controls
       public controls: boolean = true;
+     // allow camera controls
+     public autoRotate: boolean = true;
+    }
+    
+    export class modelShadowSettings {
+      // background color
+       public intensity: number = 0.0;
+      // allow camera controls
+       public softness: number  = 0.0;
      }
 

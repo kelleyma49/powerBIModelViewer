@@ -68,8 +68,11 @@ export class Visual implements IVisual {
         }
 
         // apply settings:
+        this.modelViewer.autoRotate = this.visualSettings.camera.autoRotate;
         this.modelViewer.cameraControls = this.visualSettings.camera.controls;
         this.modelViewer.style.backgroundColor = this.visualSettings.camera.backgroundColor; 
+        this.modelViewer.shadowIntensity = this.visualSettings.modelShadow.intensity;
+        this.modelViewer.shadowSoftness = this.visualSettings.modelShadow.softness;
 
         // load model:
         let dataView: DataView = options.dataViews[0];
