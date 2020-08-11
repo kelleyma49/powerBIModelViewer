@@ -1,4 +1,6 @@
 # powerBIModelViewer
+![CI](https://github.com/kelleyma49/powerBIModelViewer/workflows/CI/badge.svg)
+
 Power BI Custom Visualization built on top of [Google's &lt;model-viewer&gt;](https://modelviewer.dev/).
 
 ![](demo.gif)
