@@ -10,9 +10,10 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '12'
-      - name: Install npm software
+      - name: Install Power BI tools
         run: npm install powerbi-visuals-tools
-        run: pbiviz 
+        shell: powershell
+      - name: Install npm packages
         run: npm install
         shell: powershell
       - name: Package custom viz
