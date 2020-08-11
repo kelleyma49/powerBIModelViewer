@@ -1,0 +1,20 @@
+name: CI
+
+on: [push]
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+      - name: Install npm software
+        run: npm install powerbi-visuals-tools
+        run: pbiviz 
+        run: npm install
+        shell: powershell
+      -name: Package custom viz
+        run: pbiviz package
+        shell: powershell
