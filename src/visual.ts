@@ -39,14 +39,18 @@ import VisualObjectInstance = powerbi.VisualObjectInstance;
 import DataView = powerbi.DataView;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 
+import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
+import DataViewTable = powerbi.DataViewTable;
+import DataViewTableRow = powerbi.DataViewTableRow;
+import PrimitiveValue = powerbi.PrimitiveValue;
+
 import {ModelViewerElement} from '@google/model-viewer/dist/model-viewer';
 
 import { VisualSettings } from "./settings";
 
 export class Visual implements IVisual {
     private target: HTMLElement;
-    private modelViewer: Set<ModelViewerElement>;
-    private modelViwerDivs: Set<HTMLElement>;
+    private modelViewers: Set<ModelViewer>;
     private parentDiv: HTMLElement;
     private maxViewers: number;
     private visualSettings: VisualSettings;
@@ -57,8 +61,7 @@ export class Visual implements IVisual {
         this.parentDiv = document.createElement("div");
         this.parentDiv.setAttribute("id","model-viewer-div");
         this.parentDiv.setAttribute("class","grid-container");
-        this.modelViewer = new Set<ModelViewerElement>();
-        this.modelViwerDivs = new Set<HTMLElement>();
+        this.modelViewers = new Set<ModelViewer>();
         this.target.appendChild(this.parentDiv);
 
         this.maxViewers = 1;
@@ -68,47 +71,47 @@ export class Visual implements IVisual {
     public update(options: VisualUpdateOptions) {
         this.visualSettings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
 
+        var self = this;
+        this.modelViewers.forEach(function(value,key) {self.parentDiv.removeChild(key.Div);});
+ 
         // load model:
         let dataView: DataView = options.dataViews[0];
         //let modelUrl: string = <string>dataView.single.value;
-        //let modelUrl: string = <string>dataView.single.value;
-        let modelUrl: string = "https://cdn.glitch.com/32f1ec0f-1e16-448a-b891-71f24804e417%2FDuck.glb?v=1561641862851";
-        if (!modelUrl) {
+        this.modelViewers.clear();
+        console.log("hello!");
+        console.log(dataView.table.rows);
+
+        dataView.table.rows.forEach((row: DataViewTableRow) => {
+            row.forEach((columnValue: PrimitiveValue) => {
+                let modelUrl: string = columnValue.toString();
+                console.log(modelUrl);
+                //modelUrl = "https://cdn.glitch.com/32f1ec0f-1e16-448a-b891-71f24804e417%2FDuck.glb?v=1561641862851";
+                let viewer: ModelViewer = new ModelViewer();
+                viewer.SrcPath = modelUrl;
+                this.modelViewers.add(viewer);
+            })
+        });
+
+        this.maxViewers = Math.min(this.modelViewers.size, this.visualSettings.multiViewers.numberOfViews);
+    
+        if (this.maxViewers <= 0) {
             return;
         }
 
-        var self = this;
-        this.modelViwerDivs?.forEach(function(value,key) {self.parentDiv.removeChild(key);});
-        this.maxViewers = this.visualSettings.multiViewers.numberOfViews;
-        this.modelViewer.clear();
-        this.modelViwerDivs.clear();
-        for (let i = 0; i < this.maxViewers; i++) {
-            let div: HTMLElement = document.createElement("div");
-            this.modelViwerDivs.add(div); 
-            let viewer: ModelViewerElement = new ModelViewerElement();
-            this.modelViewer.add(viewer);
-            div.appendChild(viewer);
-            this.parentDiv.appendChild(div);   
-            viewer.src = modelUrl;
-        }
+        // update modelViewers:
+        this.modelViewers.forEach(function(value,key) {
+            value.Div = document.createElement("div");
+            value.Viewer = new ModelViewerElement();
+            value.Div.appendChild(value.Viewer);
+            self.parentDiv.appendChild(value.Div);
+            value.Viewer.src = value.SrcPath;
 
-        /*if (!this.modelViewer[0]) {  
-            this.modelViewer = new ModelViewerElement();
-            div.appendChild(this.modelViewer);
-            this.target.appendChild(div);
-        }*/
-
-        // apply settings:
-        this.modelViewer.forEach(viewer  => {
-            viewer.autoRotate = self.visualSettings.camera.autoRotate;
-            viewer.cameraControls = self.visualSettings.camera.controls;
-            viewer.style.backgroundColor = self.visualSettings.camera.backgroundColor; 
-            viewer.shadowIntensity = self.visualSettings.modelShadow.intensity;
-            viewer.shadowSoftness = self.visualSettings.modelShadow.softness;           
+            value.Viewer.autoRotate = self.visualSettings.camera.autoRotate;
+            value.Viewer.cameraControls = self.visualSettings.camera.controls;
+            value.Viewer.style.backgroundColor = self.visualSettings.camera.backgroundColor; 
+            value.Viewer.shadowIntensity = self.visualSettings.modelShadow.intensity;
+            value.Viewer.shadowSoftness = self.visualSettings.modelShadow.softness;
         });
-
-        //this.modelViewer.src = "https://cdn.glitch.com/32f1ec0f-1e16-448a-b891-71f24804e417%2FDuck.glb?v=1561641862851";
-        //console.log("after model viewer");
     }
 
     private static parseSettings(dataView: DataView): VisualSettings {
@@ -139,3 +142,9 @@ export function logExceptions(): MethodDecorator {
         }
     }
 }
+
+class ModelViewer {
+    public SrcPath: string;
+    public Viewer: ModelViewerElement;
+    public Div: HTMLElement
+}   
