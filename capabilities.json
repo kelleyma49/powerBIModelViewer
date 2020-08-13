@@ -7,6 +7,18 @@
         }
     ],
     "objects": {
+        "multiViewers": {
+            "displayName": "Multiple Viewers",
+            "properties": {
+                "numberOfViews": {
+                    "displayName": "# of Viewers",
+                    "description": "The number of multiple viewers allowed.",
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
         "camera": {
             "displayName": "Camera",
             "properties": {

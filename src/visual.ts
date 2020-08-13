@@ -45,39 +45,68 @@ import { VisualSettings } from "./settings";
 
 export class Visual implements IVisual {
     private target: HTMLElement;
-    private modelViewer: ModelViewerElement;
+    private modelViewer: Set<ModelViewerElement>;
+    private modelViwerDivs: Set<HTMLElement>;
+    private parentDiv: HTMLElement;
+    private maxViewers: number;
     private visualSettings: VisualSettings;
 
     constructor(options: VisualConstructorOptions) {
         this.target = options.element;
+
+        this.parentDiv = document.createElement("div");
+        this.parentDiv.setAttribute("id","model-viewer-div");
+        this.parentDiv.setAttribute("class","grid-container");
+        this.modelViewer = new Set<ModelViewerElement>();
+        this.modelViwerDivs = new Set<HTMLElement>();
+        this.target.appendChild(this.parentDiv);
+
+        this.maxViewers = 1;
     }
 
     @logExceptions()
     public update(options: VisualUpdateOptions) {
         this.visualSettings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
-  
-        //console.log("in update model viewer");
-        if (!this.modelViewer) {
-            const div: HTMLElement = document.createElement("div");
-            div.setAttribute("id","model-viewer-div");
-      
-            this.modelViewer = new ModelViewerElement();
-            this.modelViewer.cameraControls = true;
-            div.appendChild(this.modelViewer);
-            this.target.appendChild(div);
-        }
-
-        // apply settings:
-        this.modelViewer.autoRotate = this.visualSettings.camera.autoRotate;
-        this.modelViewer.cameraControls = this.visualSettings.camera.controls;
-        this.modelViewer.style.backgroundColor = this.visualSettings.camera.backgroundColor; 
-        this.modelViewer.shadowIntensity = this.visualSettings.modelShadow.intensity;
-        this.modelViewer.shadowSoftness = this.visualSettings.modelShadow.softness;
 
         // load model:
         let dataView: DataView = options.dataViews[0];
-        this.modelViewer.src = <string>dataView.single.value;
-        
+        //let modelUrl: string = <string>dataView.single.value;
+        //let modelUrl: string = <string>dataView.single.value;
+        let modelUrl: string = "https://cdn.glitch.com/32f1ec0f-1e16-448a-b891-71f24804e417%2FDuck.glb?v=1561641862851";
+        if (!modelUrl) {
+            return;
+        }
+
+        var self = this;
+        this.modelViwerDivs?.forEach(function(value,key) {self.parentDiv.removeChild(key);});
+        this.maxViewers = this.visualSettings.multiViewers.numberOfViews;
+        this.modelViewer.clear();
+        this.modelViwerDivs.clear();
+        for (let i = 0; i < this.maxViewers; i++) {
+            let div: HTMLElement = document.createElement("div");
+            this.modelViwerDivs.add(div); 
+            let viewer: ModelViewerElement = new ModelViewerElement();
+            this.modelViewer.add(viewer);
+            div.appendChild(viewer);
+            this.parentDiv.appendChild(div);   
+            viewer.src = modelUrl;
+        }
+
+        /*if (!this.modelViewer[0]) {  
+            this.modelViewer = new ModelViewerElement();
+            div.appendChild(this.modelViewer);
+            this.target.appendChild(div);
+        }*/
+
+        // apply settings:
+        this.modelViewer.forEach(viewer  => {
+            viewer.autoRotate = self.visualSettings.camera.autoRotate;
+            viewer.cameraControls = self.visualSettings.camera.controls;
+            viewer.style.backgroundColor = self.visualSettings.camera.backgroundColor; 
+            viewer.shadowIntensity = self.visualSettings.modelShadow.intensity;
+            viewer.shadowSoftness = self.visualSettings.modelShadow.softness;           
+        });
+
         //this.modelViewer.src = "https://cdn.glitch.com/32f1ec0f-1e16-448a-b891-71f24804e417%2FDuck.glb?v=1561641862851";
         //console.log("after model viewer");
     }

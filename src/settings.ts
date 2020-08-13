@@ -32,7 +32,8 @@ import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 export class VisualSettings extends DataViewObjectsParser {
       public camera: cameraSettings = new cameraSettings();
       public modelShadow: modelShadowSettings = new modelShadowSettings();
-      }
+      public multiViewers: multiViewersSettings = new multiViewersSettings();
+    }
 
     export class cameraSettings {
      // background color
@@ -48,5 +49,9 @@ export class VisualSettings extends DataViewObjectsParser {
        public intensity: number = 0.0;
       // allow camera controls
        public softness: number  = 0.0;
+     }
+
+     export class multiViewersSettings {
+       public numberOfViews: number = 1;
      }
 
