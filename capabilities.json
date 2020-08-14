@@ -1,9 +1,14 @@
 {
     "dataRoles": [
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Names",
+            "name": "names",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "Sources",
+            "name": "sources",
+            "kind": "Grouping"
         }
     ],
     "objects": {
@@ -61,13 +66,29 @@
         {
             "conditions": [
                 {
-                    "measure": {
+                    "names": {
+                        "max": 1
+                    },
+                    "sources": {
                         "max": 1
                     }
                 }
             ],
-            "single": {
-                "role": "measure"
+            "table": {
+                "rows": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "names"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "sources"
+                            }
+                        }
+                    ]
+                }
             }
         }
     ]
