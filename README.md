@@ -13,6 +13,6 @@ You can see the powerBIModelViewer in action in the included test file located [
 
 ## Roadmap
 Some possible future features include:
-* display of multiple viewers if multiple items are selected
-* annotations based on bound data
-* thumbnails based on bound data
+* [x] display of multiple viewers if multiple items are selected
+* [ ] annotations based on bound data
+* [ ] thumbnails based on bound data
