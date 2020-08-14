@@ -76,27 +76,23 @@ export class Visual implements IVisual {
  
         // load model:
         let dataView: DataView = options.dataViews[0];
-        //let modelUrl: string = <string>dataView.single.value;
         this.modelViewers.clear();
-        console.log("hello!");
-        console.log(dataView.table.rows);
-
         dataView.table.rows.forEach((row: DataViewTableRow) => {
+            let index: number = 0;
+            let viewer: ModelViewer = new ModelViewer();
+            this.modelViewers.add(viewer);    
             row.forEach((columnValue: PrimitiveValue) => {
-                let modelUrl: string = columnValue.toString();
-                console.log(modelUrl);
-                //modelUrl = "https://cdn.glitch.com/32f1ec0f-1e16-448a-b891-71f24804e417%2FDuck.glb?v=1561641862851";
-                let viewer: ModelViewer = new ModelViewer();
-                viewer.SrcPath = modelUrl;
-                this.modelViewers.add(viewer);
+                if (dataView.table.columns[index].roles["sources"]) {
+                    let modelUrl: string = columnValue.toString();
+                    console.log(modelUrl);
+                    //modelUrl = "https://cdn.glitch.com/32f1ec0f-1e16-448a-b891-71f24804e417%2FDuck.glb?v=1561641862851";
+                    viewer.SrcPath = modelUrl;
+                } else if (dataView.table.columns[index].roles["names"]) {
+                    viewer.Name = columnValue.toString();
+                }
+                index++;
             })
         });
-
-        this.maxViewers = Math.min(this.modelViewers.size, this.visualSettings.multiViewers.numberOfViews);
-    
-        if (this.maxViewers <= 0) {
-            return;
-        }
 
         // update modelViewers:
         this.modelViewers.forEach(function(value,key) {
@@ -106,6 +102,15 @@ export class Visual implements IVisual {
             self.parentDiv.appendChild(value.Div);
             value.Viewer.src = value.SrcPath;
 
+            console.log(value.Name);
+            console.log(value.SrcPath);
+            
+            if (value.Name) {
+                const new_p: HTMLElement = document.createElement("p");
+                new_p.appendChild(document.createTextNode(value.Name));
+                value.Viewer.appendChild(new_p);    
+            }
+   
             value.Viewer.autoRotate = self.visualSettings.camera.autoRotate;
             value.Viewer.cameraControls = self.visualSettings.camera.controls;
             value.Viewer.style.backgroundColor = self.visualSettings.camera.backgroundColor; 
@@ -145,6 +150,7 @@ export function logExceptions(): MethodDecorator {
 
 class ModelViewer {
     public SrcPath: string;
+    public Name: string;
     public Viewer: ModelViewerElement;
-    public Div: HTMLElement
+    public Div: HTMLElement;
 }   
