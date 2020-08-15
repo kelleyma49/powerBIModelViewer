@@ -60,7 +60,6 @@ export class Visual implements IVisual {
 
         this.parentDiv = document.createElement("div");
         this.parentDiv.setAttribute("id","model-viewer-div");
-        this.parentDiv.setAttribute("class","grid-container");
         this.modelViewers = new Set<ModelViewer>();
         this.target.appendChild(this.parentDiv);
 
@@ -111,12 +110,21 @@ export class Visual implements IVisual {
                 value.Viewer.appendChild(new_p);    
             }
    
+            value.Viewer.minimumRenderScale = 1.0;
+            
             value.Viewer.autoRotate = self.visualSettings.camera.autoRotate;
             value.Viewer.cameraControls = self.visualSettings.camera.controls;
             value.Viewer.style.backgroundColor = self.visualSettings.camera.backgroundColor; 
             value.Viewer.shadowIntensity = self.visualSettings.modelShadow.intensity;
             value.Viewer.shadowSoftness = self.visualSettings.modelShadow.softness;
         });
+
+        // If there's only one viewer, make it fill the visual: 
+        if (this.modelViewers.size <= 1) {
+            this.parentDiv.setAttribute("class","grid-container-single");
+        } else {
+            this.parentDiv.setAttribute("class","grid-container");
+        }
     }
 
     private static parseSettings(dataView: DataView): VisualSettings {
