@@ -63,6 +63,11 @@ export class Visual implements IVisual {
 
         this.parentDiv = document.createElement("div");
         this.parentDiv.setAttribute("id","model-viewer-div");
+        var self = this;
+        this.parentDiv.addEventListener("click", (mouseEvent) => {
+            self.selectionManager.clear();
+        });
+
         this.modelViewers = new Set<ModelViewer>();
         this.target.appendChild(this.parentDiv);
         this.selectionManager = this.host.createSelectionManager();
@@ -104,6 +109,7 @@ export class Visual implements IVisual {
             value.Div = document.createElement("div");
             value.Div.addEventListener("click", (mouseEvent) => {
                 self.selectionManager.select(value.SelectionId);
+                mouseEvent.stopPropagation();
             });
             value.Viewer = new ModelViewerElement();
             value.Div.appendChild(value.Viewer);
