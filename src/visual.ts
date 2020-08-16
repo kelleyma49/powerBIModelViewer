@@ -34,15 +34,16 @@ import powerbi from "powerbi-visuals-api";
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
+import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import DataView = powerbi.DataView;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 
-import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
-import DataViewTable = powerbi.DataViewTable;
 import DataViewTableRow = powerbi.DataViewTableRow;
 import PrimitiveValue = powerbi.PrimitiveValue;
+import ISelectionId = powerbi.extensibility.ISelectionId;
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
 
 import {ModelViewerElement} from '@google/model-viewer/dist/model-viewer';
 
@@ -50,20 +51,21 @@ import { VisualSettings } from "./settings";
 
 export class Visual implements IVisual {
     private target: HTMLElement;
+    private host: IVisualHost;
     private modelViewers: Set<ModelViewer>;
     private parentDiv: HTMLElement;
-    private maxViewers: number;
     private visualSettings: VisualSettings;
+    private selectionManager: ISelectionManager;
 
     constructor(options: VisualConstructorOptions) {
         this.target = options.element;
+        this.host = options.host;
 
         this.parentDiv = document.createElement("div");
         this.parentDiv.setAttribute("id","model-viewer-div");
         this.modelViewers = new Set<ModelViewer>();
         this.target.appendChild(this.parentDiv);
-
-        this.maxViewers = 1;
+        this.selectionManager = this.host.createSelectionManager();
     }
 
     @logExceptions()
@@ -76,14 +78,18 @@ export class Visual implements IVisual {
         // load model:
         let dataView: DataView = options.dataViews[0];
         this.modelViewers.clear();
-        dataView.table.rows.forEach((row: DataViewTableRow) => {
+        dataView.table.rows.forEach((row: DataViewTableRow, rowIndex: number) => {
             let index: number = 0;
             let viewer: ModelViewer = new ModelViewer();
-            this.modelViewers.add(viewer);    
+            this.modelViewers.add(viewer);  
+
+            viewer.SelectionId = this.host.createSelectionIdBuilder()
+            .withTable(dataView.table, rowIndex)
+            .createSelectionId();
+
             row.forEach((columnValue: PrimitiveValue) => {
                 if (dataView.table.columns[index].roles["sources"]) {
                     let modelUrl: string = columnValue.toString();
-                    console.log(modelUrl);
                     //modelUrl = "https://cdn.glitch.com/32f1ec0f-1e16-448a-b891-71f24804e417%2FDuck.glb?v=1561641862851";
                     viewer.SrcPath = modelUrl;
                 } else if (dataView.table.columns[index].roles["names"]) {
@@ -96,14 +102,14 @@ export class Visual implements IVisual {
         // update modelViewers:
         this.modelViewers.forEach(function(value,key) {
             value.Div = document.createElement("div");
+            value.Div.addEventListener("click", (mouseEvent) => {
+                self.selectionManager.select(value.SelectionId);
+            });
             value.Viewer = new ModelViewerElement();
             value.Div.appendChild(value.Viewer);
             self.parentDiv.appendChild(value.Div);
             value.Viewer.src = value.SrcPath;
-
-            console.log(value.Name);
-            console.log(value.SrcPath);
-            
+                   
             if (value.Name) {
                 const new_p: HTMLElement = document.createElement("p");
                 new_p.appendChild(document.createTextNode(value.Name));
@@ -111,7 +117,7 @@ export class Visual implements IVisual {
             }
    
             value.Viewer.minimumRenderScale = 1.0;
-            
+
             value.Viewer.autoRotate = self.visualSettings.camera.autoRotate;
             value.Viewer.cameraControls = self.visualSettings.camera.controls;
             value.Viewer.style.backgroundColor = self.visualSettings.camera.backgroundColor; 
@@ -161,4 +167,5 @@ class ModelViewer {
     public Name: string;
     public Viewer: ModelViewerElement;
     public Div: HTMLElement;
+    public SelectionId: ISelectionId;
 }   
