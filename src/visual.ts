@@ -52,11 +52,16 @@ import { VisualSettings } from "./settings";
 export class Visual implements IVisual {
     private target: HTMLElement;
     private host: IVisualHost;
-    private modelViewers: Set<ModelViewer>;
+    private modelViewers: Map<string,ModelViewer>;
     private parentDiv: HTMLElement;
     private visualSettings: VisualSettings;
     private selectionManager: ISelectionManager;
+    private focusedModelViewer: ModelViewer;
 
+    // the following SVGs were taken from http://fontawesome.com
+    // license: https://fontawesome.com/license
+    private expandIconSvg = '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="expand-alt" class="svg-inline--fa fa-expand-alt fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M212.686 315.314L120 408l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C10.697 480 0 469.255 0 456V344c0-21.382 25.803-32.09 40.922-16.971L72 360l92.686-92.686c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.249 6.248 6.249 16.378 0 22.627zm22.628-118.628L328 104l-32.922-31.029C279.958 57.851 290.666 32 312.048 32h112C437.303 32 448 42.745 448 56v112c0 21.382-25.803 32.09-40.922 16.971L376 152l-92.686 92.686c-6.248 6.248-16.379 6.248-22.627 0l-25.373-25.373c-6.249-6.248-6.249-16.378 0-22.627z"></path></svg>';
+    private compressIconSvg = '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="compress-alt" class="svg-inline--fa fa-compress-alt fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M4.686 427.314L104 328l-32.922-31.029C55.958 281.851 66.666 256 88.048 256h112C213.303 256 224 266.745 224 280v112c0 21.382-25.803 32.09-40.922 16.971L152 376l-99.314 99.314c-6.248 6.248-16.379 6.248-22.627 0L4.686 449.941c-6.248-6.248-6.248-16.379 0-22.627zM443.314 84.686L344 184l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C234.697 256 224 245.255 224 232V120c0-21.382 25.803-32.09 40.922-16.971L296 136l99.314-99.314c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.248 6.248 6.248 16.379 0 22.627z"></path></svg>';
     constructor(options: VisualConstructorOptions) {
         this.target = options.element;
         this.host = options.host;
@@ -68,7 +73,7 @@ export class Visual implements IVisual {
             self.selectionManager.clear();
         });
 
-        this.modelViewers = new Set<ModelViewer>();
+        this.modelViewers = new Map<string,ModelViewer>();
         this.target.appendChild(this.parentDiv);
         this.selectionManager = this.host.createSelectionManager();
     }
@@ -78,50 +83,121 @@ export class Visual implements IVisual {
         this.visualSettings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
 
         var self = this;
-        this.modelViewers.forEach(function(value,key) {self.parentDiv.removeChild(key.Div);});
  
         // load model:
         let dataView: DataView = options.dataViews[0];
-        this.modelViewers.clear();
+
+        let newSrcs: Array<[string,string,ISelectionId]> = new Array<[string,string,ISelectionId]>();
+
         dataView.table.rows.forEach((row: DataViewTableRow, rowIndex: number) => {
             let index: number = 0;
-            let viewer: ModelViewer = new ModelViewer();
-            this.modelViewers.add(viewer);  
-
-            viewer.SelectionId = this.host.createSelectionIdBuilder()
-            .withTable(dataView.table, rowIndex)
-            .createSelectionId();
+            var srcPath: string;
+            var srcName: string;
 
             row.forEach((columnValue: PrimitiveValue) => {
                 if (dataView.table.columns[index].roles["sources"]) {
                     let modelUrl: string = columnValue.toString();
                     //modelUrl = "https://cdn.glitch.com/32f1ec0f-1e16-448a-b891-71f24804e417%2FDuck.glb?v=1561641862851";
-                    viewer.SrcPath = modelUrl;
+                    srcPath = modelUrl;
                 } else if (dataView.table.columns[index].roles["names"]) {
-                    viewer.Name = columnValue.toString();
+                    srcName = columnValue.toString();
                 }
                 index++;
-            })
+            });
+
+            let selectionId: ISelectionId = self.host.createSelectionIdBuilder()
+            .withTable(dataView.table, rowIndex)
+            .createSelectionId();
+           
+            if (srcPath) {
+                newSrcs.push([srcPath,srcName,selectionId]);
+            }
         });
 
+        if (newSrcs.length == 0) {
+            return;
+        }
+
+        // transfer previously loaded viewers and allocated new viewers:
+        let newViewers: Map<string,ModelViewer> = new Map<string,ModelViewer>();
+        let foundFocused: boolean = false;
+        newSrcs.forEach(element => {
+            let found: ModelViewer = self.modelViewers.get(element[0]);
+            if (found) {
+                self.modelViewers.delete(element[0]);
+            } else {
+                found = new ModelViewer();
+                found.SrcPath = element[0];
+                found.Viewer = new ModelViewerElement();
+                found.Div = document.createElement("div");
+                self.parentDiv.appendChild(found.Div);
+                found.Div.appendChild(found.Viewer);
+                found.Viewer.src = found.SrcPath;
+
+                // initially don't display:
+                found.Div.style.display = "none";
+
+                found.ExpandButton = document.createElement("button");
+                found.ExpandButton .className = "expand-button";
+                found.ExpandButton .addEventListener("click", (mouseEvent) => {
+                    self.toggleExpandShape(found);
+                    mouseEvent.stopPropagation();
+                });
+
+                found.ExpandIconSvg = document.createElement(null);
+                found.ExpandIconSvg.innerHTML = self.expandIconSvg;
+                found.ExpandButton.appendChild(found.ExpandIconSvg);
+                found.Viewer.appendChild(found.ExpandButton);
+            }
+
+            newViewers.set(element[0],found);
+            found.Name = element[1];
+            found.SelectionId = element[2];
+            
+            // setup name tag:
+            if (found.Name) {
+                if (!found.NameText) {
+                    found.NameParagraph = document.createElement("p");
+                    found.NameText = document.createTextNode(found.Name);
+                    found.NameParagraph.appendChild(found.NameText);
+                    found.Viewer.appendChild(found.NameParagraph);         
+                } else {
+                    found.NameText.textContent = found.Name;
+                }
+            } else if (found.NameText) {
+                found.Viewer.removeChild(found.NameParagraph);
+                found.NameText = null;
+                found.NameParagraph = null;
+            }
+            
+            if (self.focusedModelViewer == found) 
+                foundFocused = true;
+        });
+
+        // focused was removed - make sure all views are visible:
+        if (!foundFocused) {
+            this.focusedModelViewer = null;
+            newViewers.forEach((value,key) => {
+                value.Div.style.display = "initial";
+            });
+        } 
+        // clean up previous viewers:
+        this.modelViewers.forEach((value,key) => self.parentDiv.removeChild(value.Div) );
+        this.modelViewers.clear();
+        this.modelViewers = newViewers;
+
         // update modelViewers:
-        this.modelViewers.forEach(function(value,key) {
-            value.Div = document.createElement("div");
-            value.Div.addEventListener("click", (mouseEvent) => {
+        this.modelViewers.forEach((value,key) => {
+            // update click handler as selection id might have changed:
+            if (value.SelectListener) {
+                value.Div.removeEventListener("click", value.SelectListener);
+            }
+            value.SelectListener = (mouseEvent) => {
                 self.selectionManager.select(value.SelectionId);
                 mouseEvent.stopPropagation();
-            });
-            value.Viewer = new ModelViewerElement();
-            value.Div.appendChild(value.Viewer);
-            self.parentDiv.appendChild(value.Div);
-            value.Viewer.src = value.SrcPath;
-                   
-            if (value.Name) {
-                const new_p: HTMLElement = document.createElement("p");
-                new_p.appendChild(document.createTextNode(value.Name));
-                value.Viewer.appendChild(new_p);    
             }
-   
+            value.Div.addEventListener("click", value.SelectListener);
+                   
             value.Viewer.minimumRenderScale = 1.0;
 
             value.Viewer.autoRotate = self.visualSettings.camera.autoRotate;
@@ -130,13 +206,48 @@ export class Visual implements IVisual {
             value.Viewer.shadowIntensity = self.visualSettings.modelShadow.intensity;
             value.Viewer.shadowSoftness = self.visualSettings.modelShadow.softness;
         });
-
-        // If there's only one viewer, make it fill the visual: 
-        if (this.modelViewers.size <= 1) {
-            this.parentDiv.setAttribute("class","grid-container-single");
-        } else {
-            this.parentDiv.setAttribute("class","grid-container");
+ 
+        let hasMultipleViewers = this.modelViewers.size > 1; 
+        if (hasMultipleViewers && !this.focusedModelViewer)
+            this.setParentDivClass(true);
+        else if (!hasMultipleViewers) {
+            this.setParentDivClass(false);
         }
+
+        this.modelViewers.forEach((value,key) => { 
+            value.ExpandButton.style.display = hasMultipleViewers?
+                "initial":"none";
+        });  
+    }
+
+    private toggleExpandShape(viewer: ModelViewer)
+    {
+        if (!this.focusedModelViewer) {
+            this.focusedModelViewer = viewer;
+            var self = this;
+            this.modelViewers.forEach((value,key) => {
+                if (value.Viewer != self.focusedModelViewer.Viewer) {
+                    value.Div.style.display = "none";
+                } else {
+                    value.ExpandIconSvg.innerHTML = self.compressIconSvg;
+                }
+            });
+            this.setParentDivClass(false);
+        } else {
+            this.focusedModelViewer = null;
+  
+            var self = this;
+            this.modelViewers.forEach((value,key) => {
+                value.Div.style.display = "initial";
+                value.ExpandIconSvg.innerHTML = self.expandIconSvg;
+            });
+            this.setParentDivClass(this.modelViewers.size > 1);
+        }
+    }
+
+    private setParentDivClass(multipleViewers: boolean)
+    {
+        this.parentDiv.setAttribute("class",multipleViewers?"grid-container":"grid-container-single");
     }
 
     private static parseSettings(dataView: DataView): VisualSettings {
@@ -174,4 +285,9 @@ class ModelViewer {
     public Viewer: ModelViewerElement;
     public Div: HTMLElement;
     public SelectionId: ISelectionId;
+    public NameText: Text;
+    public NameParagraph: HTMLElement;
+    public ExpandButton: HTMLButtonElement;
+    public ExpandIconSvg: HTMLElement;
+    public SelectListener: { (event: MouseEvent): void };
 }   
