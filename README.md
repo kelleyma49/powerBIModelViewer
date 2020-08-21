@@ -5,6 +5,8 @@ Power BI Custom Visualization built on top of [Google's &lt;model-viewer&gt;](ht
 
 ![](demo.gif)
 
+You can view a live example by following this [link](https://kelleyma49.github.io/powerBIModelViewer/).
+
 ## Features
 The current version of this custom visualization displays a single model based on the bound input. Camera and shadow formatting options are tunable in the 'Format' tab.
 
