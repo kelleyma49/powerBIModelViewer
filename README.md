@@ -18,3 +18,7 @@ Some possible future features include:
 * [x] display of multiple viewers if multiple items are selected
 * [ ] annotations based on bound data
 * [ ] thumbnails based on bound data
+
+## Attribution
+
+Car model GLBs and PNGs were borrwed from [Kenney's car kit](https://www.kenney.nl/assets/car-kit).
