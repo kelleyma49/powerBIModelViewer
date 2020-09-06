@@ -21,4 +21,4 @@ Some possible future features include:
 
 ## Attribution
 
-Car model GLBs and PNGs were borrwed from [Kenney's car kit](https://www.kenney.nl/assets/car-kit).
+Car model GLBs and PNGs were borrowed from [Kenney's car kit](https://www.kenney.nl/assets/car-kit).
