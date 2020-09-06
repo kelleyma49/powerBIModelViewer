@@ -87,12 +87,13 @@ export class Visual implements IVisual {
         // load model:
         let dataView: DataView = options.dataViews[0];
 
-        let newSrcs: Array<[string,string,ISelectionId]> = new Array<[string,string,ISelectionId]>();
+        let newSrcs: Array<[string,string,string,ISelectionId]> = new Array<[string,string,string,ISelectionId]>();
 
         dataView.table.rows.forEach((row: DataViewTableRow, rowIndex: number) => {
             let index: number = 0;
-            var srcPath: string;
-            var srcName: string;
+            var srcPath: string = null;
+            var srcName: string = null;
+            var posterPath: string = null;
 
             row.forEach((columnValue: PrimitiveValue) => {
                 if (dataView.table.columns[index].roles["sources"]) {
@@ -101,6 +102,8 @@ export class Visual implements IVisual {
                     srcPath = modelUrl;
                 } else if (dataView.table.columns[index].roles["names"]) {
                     srcName = columnValue.toString();
+                }  else if (dataView.table.columns[index].roles["posters"]) {
+                    posterPath = columnValue.toString();
                 }
                 index++;
             });
@@ -110,7 +113,7 @@ export class Visual implements IVisual {
             .createSelectionId();
            
             if (srcPath) {
-                newSrcs.push([srcPath,srcName,selectionId]);
+                newSrcs.push([srcPath,srcName,posterPath,selectionId]);
             }
         });
 
@@ -138,8 +141,8 @@ export class Visual implements IVisual {
                 found.Div.style.display = "none";
 
                 found.ExpandButton = document.createElement("button");
-                found.ExpandButton .className = "expand-button";
-                found.ExpandButton .addEventListener("click", (mouseEvent) => {
+                found.ExpandButton.className = "expand-button";
+                found.ExpandButton.addEventListener("click", (mouseEvent) => {
                     self.toggleExpandShape(found);
                     mouseEvent.stopPropagation();
                 });
@@ -152,7 +155,8 @@ export class Visual implements IVisual {
 
             newViewers.set(element[0],found);
             found.Name = element[1];
-            found.SelectionId = element[2];
+            found.PosterPath = element[2];
+            found.SelectionId = element[3];
             
             // setup name tag:
             if (found.Name) {
@@ -200,6 +204,9 @@ export class Visual implements IVisual {
                    
             value.Viewer.minimumRenderScale = 1.0;
 
+            value.Viewer.poster = value.PosterPath;
+            value.Viewer.loading = self.visualSettings.interaction.loading;
+            value.Viewer.reveal = self.visualSettings.interaction.reveal;
             value.Viewer.autoRotate = self.visualSettings.camera.autoRotate;
             value.Viewer.cameraControls = self.visualSettings.camera.controls;
             value.Viewer.style.backgroundColor = self.visualSettings.camera.backgroundColor; 
@@ -280,6 +287,7 @@ export function logExceptions(): MethodDecorator {
 }
 
 class ModelViewer {
+    public PosterPath: string;
     public SrcPath: string;
     public Name: string;
     public Viewer: ModelViewerElement;

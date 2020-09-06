@@ -30,22 +30,28 @@ import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
 import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 
 export class VisualSettings extends DataViewObjectsParser {
-      public camera: cameraSettings = new cameraSettings();
-      public modelShadow: modelShadowSettings = new modelShadowSettings();
-    }
+  public interaction: interactionSettings = new interactionSettings();
+  public camera: cameraSettings = new cameraSettings();
+  public modelShadow: modelShadowSettings = new modelShadowSettings();
+}
 
-    export class cameraSettings {
-     // background color
-      public backgroundColor: string = "";
-     // allow camera controls
-      public controls: boolean = true;
-     // allow camera controls
-     public autoRotate: boolean = true;
-    }
-    
-    export class modelShadowSettings {
-      // background color
-       public intensity: number = 0.0;
-      // allow camera controls
-       public softness: number  = 0.0;
-     }
+export class interactionSettings {
+  public loading: string = "auto";
+  public reveal: string = "auto";
+}
+
+export class cameraSettings {
+  // background color
+  public backgroundColor: string = "";
+  // allow camera controls
+  public controls: boolean = true;
+  // allow camera controls
+  public autoRotate: boolean = true;
+}
+
+export class modelShadowSettings {
+  // background color
+  public intensity: number = 0.0;
+  // allow camera controls
+  public softness: number = 0.0;
+}

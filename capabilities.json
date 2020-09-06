@@ -9,9 +9,59 @@
             "displayName": "Sources",
             "name": "sources",
             "kind": "Grouping"
+        },
+        {
+            "displayName": "Posters",
+            "name": "posters",
+            "kind": "Grouping"
         }
     ],
     "objects": {
+        "interaction": {
+            "displayName": "Interaction",
+            "properties": {
+                "loading": {
+                    "displayName": "Loading",
+                    "description": "Describes what conditions the model should be loaded.",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "auto",
+                                "displayName": "auto"
+                            },
+                            {
+                                "value": "lazy",
+                                "displayName": "lazy"
+                            },
+                            {
+                                "value": "eager",
+                                "displayName": "eager"
+                            }
+                        ]
+                    }
+                },
+                "reveal": {
+                    "displayName": "Reveal",
+                    "description": "This attribute controls when the model should be revealed.",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "auto",
+                                "displayName": "auto"
+                            },
+                            {
+                                "value": "interaction",
+                                "displayName": "interaction"
+                            },
+                            {
+                                "value": "manual",
+                                "displayName": "manual"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
         "camera": {
             "displayName": "Camera",
             "properties": {
@@ -71,6 +121,9 @@
                     },
                     "sources": {
                         "max": 1
+                    },
+                    "posters": {
+                        "max": 1
                     }
                 }
             ],
@@ -85,6 +138,11 @@
                         {
                             "for": {
                                 "in": "sources"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "posters"
                             }
                         }
                     ]
